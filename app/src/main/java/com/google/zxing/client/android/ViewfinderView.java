@@ -27,6 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import java.util.List;
  */
 public final class ViewfinderView extends View {
 
+  private static final String TAG = ViewfinderView.class.getSimpleName();
   private static final int[] SCANNER_ALPHA = {0, 64, 128, 192, 255, 192, 128, 64};
   private static final long ANIMATION_DELAY = 80L;
   private static final int CURRENT_POINT_OPACITY = 0xA0;
@@ -157,6 +159,8 @@ public final class ViewfinderView extends View {
   }
 
   public void drawViewfinder() {
+    Log.d(TAG, Log.getStackTraceString(new Throwable()));
+
     Bitmap resultBitmap = this.resultBitmap;
     this.resultBitmap = null;
     if (resultBitmap != null) {

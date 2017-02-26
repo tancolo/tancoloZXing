@@ -41,6 +41,8 @@ public final class OpenCameraInterface {
    * @return handle to {@link OpenCamera} that was opened
    */
   public static OpenCamera open(int cameraId) {
+Log.e(TAG, "TANHQ==> openCamera \n "
++ Log.getStackTraceString( new Throwable()) );
 
     int numCameras = Camera.getNumberOfCameras();
     if (numCameras == 0) {

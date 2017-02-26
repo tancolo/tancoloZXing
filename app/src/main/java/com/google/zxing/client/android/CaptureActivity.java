@@ -156,6 +156,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     // want to open the camera driver and measure the screen size if we're going to show the help on
     // first launch. That led to bugs where the scanning rectangle was the wrong size and partially
     // off screen.
+      Log.e(TAG, "TANHQ===> init cameraManager");
     cameraManager = new CameraManager(getApplication());
 
     viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
@@ -194,10 +195,14 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     decodeFormats = null;
     characterSet = null;
 
+      Log.e(TAG, "TANHQ===> intent = " + intent);
     if (intent != null) {
 
       String action = intent.getAction();
       String dataString = intent.getDataString();
+
+        Log.e(TAG, "TANHQ===> action = " + action
+                + "\n dataString = " + dataString);
 
       if (Intents.Scan.ACTION.equals(action)) {
 
@@ -258,9 +263,11 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     if (hasSurface) {
       // The activity was paused but not stopped, so the surface still exists. Therefore
       // surfaceCreated() won't be called, so init the camera here.
+        Log.e(TAG, "TANHQ===>  initCamera ");
       initCamera(surfaceHolder);
     } else {
       // Install the callback and wait for surfaceCreated() to init the camera.
+        Log.e(TAG, "TANHQ===> surfaceHolder.addCallback ");
       surfaceHolder.addCallback(this);
     }
   }
@@ -388,6 +395,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+      Log.d(TAG, "onActivityResult \n" + Log.getStackTraceString(new Throwable()));
+
     if (resultCode == RESULT_OK && requestCode == HISTORY_REQUEST_CODE && historyManager != null) {
       int itemNumber = intent.getIntExtra(Intents.History.ITEM_NUMBER, -1);
       if (itemNumber >= 0) {
@@ -445,6 +454,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     inactivityTimer.onActivity();
     lastResult = rawResult;
     ResultHandler resultHandler = ResultHandlerFactory.makeResultHandler(this, rawResult);
+Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
 
     boolean fromLiveScan = barcode != null;
     if (fromLiveScan) {
@@ -712,6 +722,9 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   }
 
   private void initCamera(SurfaceHolder surfaceHolder) {
+      Log.e(TAG, "initCamera, surfaceHolder = " + surfaceHolder);
+      Log.e(TAG, Log.getStackTraceString(new Throwable()));
+
     if (surfaceHolder == null) {
       throw new IllegalStateException("No SurfaceHolder provided");
     }

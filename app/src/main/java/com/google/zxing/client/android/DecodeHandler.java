@@ -92,6 +92,8 @@ final class DecodeHandler extends Handler {
       // Don't log the barcode contents for security.
       long end = System.currentTimeMillis();
       Log.d(TAG, "Found barcode in " + (end - start) + " ms");
+      Log.d(TAG, Log.getStackTraceString(new Throwable()));
+
       if (handler != null) {
         Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);
         Bundle bundle = new Bundle();

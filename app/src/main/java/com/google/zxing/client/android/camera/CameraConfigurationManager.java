@@ -47,6 +47,8 @@ final class CameraConfigurationManager {
   private Point previewSizeOnScreen;
 
   CameraConfigurationManager(Context context) {
+    Log.d(TAG, "CameraConfigurationManager");
+    Log.d(TAG, Log.getStackTraceString(new Throwable()));
     this.context = context;
   }
 
@@ -54,6 +56,9 @@ final class CameraConfigurationManager {
    * Reads, one time, values from the camera that are needed by the app.
    */
   void initFromCameraParameters(OpenCamera camera) {
+    Log.d(TAG, "initFromCameraParameters");
+    Log.d(TAG, Log.getStackTraceString(new Throwable()));
+
     Camera.Parameters parameters = camera.getCamera().getParameters();
     WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     Display display = manager.getDefaultDisplay();

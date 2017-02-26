@@ -63,12 +63,14 @@ public final class CaptureActivityHandler extends Handler {
                          Map<DecodeHintType,?> baseHints,
                          String characterSet,
                          CameraManager cameraManager) {
+      Log.d(TAG, "CaptureActivityHandler, new DecodeThread");
+
     this.activity = activity;
     decodeThread = new DecodeThread(activity, decodeFormats, baseHints, characterSet,
         new ViewfinderResultPointCallback(activity.getViewfinderView()));
     decodeThread.start();
     state = State.SUCCESS;
-
+Log.d(TAG, "CaptureActivityHandler");
     // Start ourselves capturing previews and decoding.
     this.cameraManager = cameraManager;
     cameraManager.startPreview();
@@ -155,6 +157,9 @@ public final class CaptureActivityHandler extends Handler {
   }
 
   private void restartPreviewAndDecode() {
+    Log.d(TAG, "TANHQ===> restartPreviewAndDecode, state = " + state + "\n"
+    + Log.getStackTraceString(new Throwable()));
+
     if (state == State.SUCCESS) {
       state = State.PREVIEW;
       cameraManager.requestPreviewFrame(decodeThread.getHandler(), R.id.decode);

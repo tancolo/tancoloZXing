@@ -41,6 +41,7 @@ final class DecodeThread extends Thread {
 
   public static final String BARCODE_BITMAP = "barcode_bitmap";
   public static final String BARCODE_SCALED_FACTOR = "barcode_scaled_factor";
+  public static final String TAG = "DecodeThread";
 
   private final CaptureActivity activity;
   private final Map<DecodeHintType,Object> hints;
@@ -52,6 +53,9 @@ final class DecodeThread extends Thread {
                Map<DecodeHintType,?> baseHints,
                String characterSet,
                ResultPointCallback resultPointCallback) {
+
+    Log.d(TAG, "DecodeThread");
+    Log.d(TAG, Log.getStackTraceString(new Throwable()));
 
     this.activity = activity;
     handlerInitLatch = new CountDownLatch(1);
@@ -104,6 +108,7 @@ final class DecodeThread extends Thread {
 
   @Override
   public void run() {
+    Log.d(TAG, "DecodeThread.java run... ...Thread id = " + Thread.currentThread().getId());
     Looper.prepare();
     handler = new DecodeHandler(activity, hints);
     handlerInitLatch.countDown();

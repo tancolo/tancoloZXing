@@ -63,6 +63,7 @@ public final class CameraManager {
   private final PreviewCallback previewCallback;
 
   public CameraManager(Context context) {
+    Log.e(TAG, "TANHQ===> CameraManager");
     this.context = context;
     this.configManager = new CameraConfigurationManager(context);
     previewCallback = new PreviewCallback(configManager);
@@ -75,6 +76,7 @@ public final class CameraManager {
    * @throws IOException Indicates the camera driver failed to open.
    */
   public synchronized void openDriver(SurfaceHolder holder) throws IOException {
+    Log.e(TAG, "TANHQ===> openDriver");
     OpenCamera theCamera = camera;
     if (theCamera == null) {
       theCamera = OpenCameraInterface.open(requestedCameraId);
@@ -121,6 +123,7 @@ public final class CameraManager {
   }
 
   public synchronized boolean isOpen() {
+    Log.e(TAG, "TANHQ===> isOpen(), camera = " + camera);
     return camera != null;
   }
 
@@ -128,6 +131,7 @@ public final class CameraManager {
    * Closes the camera driver if still in use.
    */
   public synchronized void closeDriver() {
+    Log.e(TAG, "TANHQ===> closeDriver");
     if (camera != null) {
       camera.getCamera().release();
       camera = null;
@@ -142,6 +146,7 @@ public final class CameraManager {
    * Asks the camera hardware to begin drawing preview frames to the screen.
    */
   public synchronized void startPreview() {
+    Log.e(TAG, "TANHQ===> startPreview");
     OpenCamera theCamera = camera;
     if (theCamera != null && !previewing) {
       theCamera.getCamera().startPreview();
@@ -154,6 +159,7 @@ public final class CameraManager {
    * Tells the camera to stop drawing preview frames.
    */
   public synchronized void stopPreview() {
+    Log.e(TAG, "TANHQ===> stopPreview");
     if (autoFocusManager != null) {
       autoFocusManager.stop();
       autoFocusManager = null;
@@ -280,6 +286,9 @@ public final class CameraManager {
    * @param cameraId camera ID of the camera to use. A negative value means "no preference".
    */
   public synchronized void setManualCameraId(int cameraId) {
+      Log.d(TAG, "setManualCameraId, cameraId = " + cameraId + "\n"
+      + Log.getStackTraceString(new Throwable()));
+
     requestedCameraId = cameraId;
   }
   
