@@ -270,6 +270,7 @@ public final class CameraManager {
         return null;
       }
 
+      //add by tancolo
       if(screenResolution.x < screenResolution.y){
         // portrait
         rect.left = rect.left * cameraResolution.y / screenResolution.x;
@@ -283,6 +284,7 @@ public final class CameraManager {
         rect.top = rect.top * cameraResolution.y / screenResolution.y;
         rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
       }
+      // end add
 
       framingRectInPreview = rect;
     }

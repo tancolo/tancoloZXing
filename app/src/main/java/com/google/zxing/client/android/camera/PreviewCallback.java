@@ -47,6 +47,7 @@ final class PreviewCallback implements Camera.PreviewCallback {
     Point cameraResolution = configManager.getCameraResolution();
     Handler thePreviewHandler = previewHandler;
     if (cameraResolution != null && thePreviewHandler != null) {
+        //add by tancolo
       Point screenResolution = configManager.getScreenResolution();
       Message message;
       if (screenResolution.x < screenResolution.y){
@@ -60,6 +61,8 @@ final class PreviewCallback implements Camera.PreviewCallback {
       }
 //      Message message = thePreviewHandler.obtainMessage(previewMessage, cameraResolution.x,
 //          cameraResolution.y, data);
+        //end add
+
       message.sendToTarget();
       previewHandler = null;
     } else {
