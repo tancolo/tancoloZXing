@@ -34,6 +34,7 @@ import com.google.zxing.client.android.share.ShareActivity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -53,6 +54,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -116,6 +118,10 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private BeepManager beepManager;
   private AmbientLightManager ambientLightManager;
 
+  //add by tan
+  MyOrientationDetector myOrientationDetector;
+  //end add
+
   ViewfinderView getViewfinderView() {
     return viewfinderView;
   }
@@ -142,6 +148,11 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     ambientLightManager = new AmbientLightManager(this);
 
     PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+    //add by tancolo
+    myOrientationDetector = new MyOrientationDetector(this);
+    myOrientationDetector.setLastOrientation(getWindowManager().getDefaultDisplay().getRotation());
+    //end add
   }
 
   @Override
@@ -174,6 +185,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
       setRequestedOrientation(getCurrentOrientation());
     } else {
       setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+      myOrientationDetector.enable();
     }
 
     resetStatusView();
@@ -274,7 +286,9 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
   private int getCurrentOrientation() {
     int rotation = getWindowManager().getDefaultDisplay().getRotation();
+    Log.d(TAG, "getCurrentOrientation: rotation = " + rotation );
     if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+      Log.d(TAG, "getCurrentOrientation: ORIENTATION_LANDSCAPE" );
       switch (rotation) {
         case Surface.ROTATION_0:
         case Surface.ROTATION_90:
@@ -283,6 +297,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
           return ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
       }
     } else {
+      Log.d(TAG, "getCurrentOrientation: !!! NOT ORIENTATION_LANDSCAPE" );
       switch (rotation) {
         case Surface.ROTATION_0:
         case Surface.ROTATION_270:
@@ -321,6 +336,10 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
       SurfaceHolder surfaceHolder = surfaceView.getHolder();
       surfaceHolder.removeCallback(this);
     }
+    //add by tancolo
+    myOrientationDetector.disable();
+    //end add
+
     super.onPause();
   }
 
@@ -777,4 +796,48 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
   public void drawViewfinder() {
     viewfinderView.drawViewfinder();
   }
+
+  //add by tancolo
+  private class MyOrientationDetector extends OrientationEventListener {
+
+    private int lastOrientation = -1;
+
+    MyOrientationDetector(Context context) {
+      super(context);
+    }
+
+    void setLastOrientation(int rotation) {
+      switch (rotation) {
+        case Surface.ROTATION_90:
+          lastOrientation = 270;
+          break;
+        case Surface.ROTATION_270:
+          lastOrientation = 90;
+          break;
+        default:
+          lastOrientation = -1;
+      }
+    }
+
+    @Override
+    public void onOrientationChanged(int orientation) {
+      Log.d(TAG, "orientation:" + orientation);
+      if (orientation > 45 && orientation < 135) {
+        orientation = 90;
+      } else if (orientation > 225 && orientation < 315) {
+        orientation = 270;
+      } else {
+        orientation = -1;
+      }
+      if ((orientation == 90  && lastOrientation == 270) || (orientation == 270  && lastOrientation == 90)) {
+        Log.i(TAG, "orientation:" + orientation + "lastOrientation:" + lastOrientation);
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
+        lastOrientation = orientation;
+        Log.i(TAG, "SUCCESS");
+      }
+    }
+  }
+  //end add
 }
