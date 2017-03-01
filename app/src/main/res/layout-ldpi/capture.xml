@@ -15,7 +15,8 @@
  limitations under the License.
  -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools">
+       xmlns:tools="http://schemas.android.com/tools"
+       xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <SurfaceView android:id="@+id/preview_view"
                android:layout_width="fill_parent"
@@ -24,7 +25,12 @@
   <com.google.zxing.client.android.ViewfinderView
       android:id="@+id/viewfinder_view"
       android:layout_width="fill_parent"
-      android:layout_height="fill_parent"/>
+      android:layout_height="fill_parent"
+      app:inner_corner_length="30dp"
+      app:inner_corner_width="5dp"
+      app:inner_scan_bitmap="@drawable/scanline"
+      app:inner_scan_speed="10"
+      app:inner_scan_iscircle="false"/>
 
   <LinearLayout android:id="@+id/result_view"
                 android:orientation="vertical"
