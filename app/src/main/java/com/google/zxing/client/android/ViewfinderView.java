@@ -25,7 +25,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -52,6 +54,19 @@ public final class ViewfinderView extends View {
   private final Paint paint;
   private Bitmap resultBitmap;
   private final int maskColor;
+  //add by tan
+  private final int triAngleColor;   //边角的颜色
+  private final int lineColor;       //中间线的颜色
+  private final int textColor;       //文字的颜色
+  private final int triAngleLength;  //每个角的点距离
+  private final int triAngleWidth;   //每个角的点宽度
+  private final int textMarinTop;    //文字距离识别框的距离
+  private int lineOffsetCount = 0;
+
+  private Paint linePaint;
+  private Paint triAnglePaint;
+  private Paint textPaint;
+  //end add
   private final int resultColor;
   private final int laserColor;
   private final int resultPointColor;
@@ -73,10 +88,34 @@ public final class ViewfinderView extends View {
     scannerAlpha = 0;
     possibleResultPoints = new ArrayList<>(5);
     lastPossibleResultPoints = null;
+    //add by tan
+    triAngleColor = resources.getColor(R.color.triangle_color);
+    lineColor = resources.getColor(R.color.line_color);
+    textColor = resources.getColor(R.color.text_color);
+
+    triAngleLength = dp2px(20);
+    triAngleWidth = dp2px(4);
+    textMarinTop = dp2px(30);
+
+    triAnglePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    triAnglePaint.setColor(triAngleColor);
+    triAnglePaint.setStrokeWidth(triAngleWidth);
+    triAnglePaint.setStyle(Paint.Style.STROKE);
+
+    linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    linePaint.setColor(lineColor);
+
+    textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    textPaint.setColor(textColor);
+    textPaint.setTextSize(dp2px(14));
+
+    //end
+
   }
 
   public void setCameraManager(CameraManager cameraManager) {
     this.cameraManager = cameraManager;
+    //invalidate();//重新进入可能不刷新，所以调用一次。
   }
 
   @SuppressLint("DrawAllocation")
@@ -106,46 +145,90 @@ public final class ViewfinderView extends View {
       canvas.drawBitmap(resultBitmap, null, frame, paint);
     } else {
 
-      // Draw a red "laser scanner" line through the middle to show decoding is active
-      paint.setColor(laserColor);
-      paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
-      scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
-      int middle = frame.height() / 2 + frame.top;
-      canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
-      
-      float scaleX = frame.width() / (float) previewFrame.width();
-      float scaleY = frame.height() / (float) previewFrame.height();
 
-      List<ResultPoint> currentPossible = possibleResultPoints;
-      List<ResultPoint> currentLast = lastPossibleResultPoints;
-      int frameLeft = frame.left;
-      int frameTop = frame.top;
-      if (currentPossible.isEmpty()) {
-        lastPossibleResultPoints = null;
+//      // Draw a red "laser scanner" line through the middle to show decoding is active
+//      paint.setColor(laserColor);
+//      paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
+//      scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
+//      int middle = frame.height() / 2 + frame.top;
+//      canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1, middle + 2, paint);
+//
+//      float scaleX = frame.width() / (float) previewFrame.width();
+//      float scaleY = frame.height() / (float) previewFrame.height();
+//
+//      List<ResultPoint> currentPossible = possibleResultPoints;
+//      List<ResultPoint> currentLast = lastPossibleResultPoints;
+//      int frameLeft = frame.left;
+//      int frameTop = frame.top;
+//      if (currentPossible.isEmpty()) {
+//        lastPossibleResultPoints = null;
+//      } else {
+//        possibleResultPoints = new ArrayList<>(5);
+//        lastPossibleResultPoints = currentPossible;
+//        paint.setAlpha(CURRENT_POINT_OPACITY);
+//        paint.setColor(resultPointColor);
+//        synchronized (currentPossible) {
+//          for (ResultPoint point : currentPossible) {
+//            canvas.drawCircle(frameLeft + (int) (point.getX() * scaleX),
+//                              frameTop + (int) (point.getY() * scaleY),
+//                              POINT_SIZE, paint);
+//          }
+//        }
+//      }
+//      if (currentLast != null) {
+//        paint.setAlpha(CURRENT_POINT_OPACITY / 2);
+//        paint.setColor(resultPointColor);
+//        synchronized (currentLast) {
+//          float radius = POINT_SIZE / 2.0f;
+//          for (ResultPoint point : currentLast) {
+//            canvas.drawCircle(frameLeft + (int) (point.getX() * scaleX),
+//                              frameTop + (int) (point.getY() * scaleY),
+//                              radius, paint);
+//          }
+//        }
+//      }
+
+      //add by tan
+      // 四个角落的三角
+      Path leftTopPath = new Path();
+      leftTopPath.moveTo(frame.left + triAngleLength, frame.top + triAngleWidth / 2);
+      leftTopPath.lineTo(frame.left + triAngleWidth / 2, frame.top + triAngleWidth / 2);
+      leftTopPath.lineTo(frame.left + triAngleWidth / 2, frame.top + triAngleLength);
+      canvas.drawPath(leftTopPath, triAnglePaint);
+
+      Path rightTopPath = new Path();
+      rightTopPath.moveTo(frame.right - triAngleLength, frame.top + triAngleWidth / 2);
+      rightTopPath.lineTo(frame.right - triAngleWidth / 2, frame.top + triAngleWidth / 2);
+      rightTopPath.lineTo(frame.right - triAngleWidth / 2, frame.top + triAngleLength);
+      canvas.drawPath(rightTopPath, triAnglePaint);
+
+      Path leftBottomPath = new Path();
+      leftBottomPath.moveTo(frame.left + triAngleWidth / 2, frame.bottom - triAngleLength);
+      leftBottomPath.lineTo(frame.left + triAngleWidth / 2, frame.bottom - triAngleWidth / 2);
+      leftBottomPath.lineTo(frame.left + triAngleLength, frame.bottom - triAngleWidth / 2);
+      canvas.drawPath(leftBottomPath, triAnglePaint);
+
+      Path rightBottomPath = new Path();
+      rightBottomPath.moveTo(frame.right - triAngleLength, frame.bottom - triAngleWidth / 2);
+      rightBottomPath.lineTo(frame.right - triAngleWidth / 2, frame.bottom - triAngleWidth / 2);
+      rightBottomPath.lineTo(frame.right - triAngleWidth / 2, frame.bottom - triAngleLength);
+      canvas.drawPath(rightBottomPath, triAnglePaint);
+
+      //end
+
+
+      //循环划线，从上到下
+      if (lineOffsetCount > frame.bottom - frame.top - dp2px(10)) {
+        lineOffsetCount = 0;
       } else {
-        possibleResultPoints = new ArrayList<>(5);
-        lastPossibleResultPoints = currentPossible;
-        paint.setAlpha(CURRENT_POINT_OPACITY);
-        paint.setColor(resultPointColor);
-        synchronized (currentPossible) {
-          for (ResultPoint point : currentPossible) {
-            canvas.drawCircle(frameLeft + (int) (point.getX() * scaleX),
-                              frameTop + (int) (point.getY() * scaleY),
-                              POINT_SIZE, paint);
-          }
-        }
-      }
-      if (currentLast != null) {
-        paint.setAlpha(CURRENT_POINT_OPACITY / 2);
-        paint.setColor(resultPointColor);
-        synchronized (currentLast) {
-          float radius = POINT_SIZE / 2.0f;
-          for (ResultPoint point : currentLast) {
-            canvas.drawCircle(frameLeft + (int) (point.getX() * scaleX),
-                              frameTop + (int) (point.getY() * scaleY),
-                              radius, paint);
-          }
-        }
+        lineOffsetCount = lineOffsetCount + 6;
+//            canvas.drawLine(frame.left, frame.top + lineOffsetCount, frame.right, frame.top + lineOffsetCount, linePaint);    //画一条红色的线
+        Rect lineRect = new Rect();
+        lineRect.left = frame.left;
+        lineRect.top = frame.top + lineOffsetCount;
+        lineRect.right = frame.right;
+        lineRect.bottom = frame.top + dp2px(10) + lineOffsetCount;
+        canvas.drawBitmap(((BitmapDrawable)(getResources().getDrawable(R.drawable.scanline))).getBitmap(), null, lineRect, linePaint);
       }
 
       // Request another update at the animation interval, but only repaint the laser line,
@@ -189,6 +272,11 @@ public final class ViewfinderView extends View {
         points.subList(0, size - MAX_RESULT_POINTS / 2).clear();
       }
     }
+  }
+
+  private int dp2px(int dp) {
+    float density = getContext().getResources().getDisplayMetrics().density;
+    return (int) (dp * density + 0.5f);
   }
 
 }
