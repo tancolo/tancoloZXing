@@ -821,7 +821,7 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
 
     @Override
     public void onOrientationChanged(int orientation) {
-      Log.d(TAG, "orientation:" + orientation);
+      //Log.d(TAG, "orientation:" + orientation);
       if (orientation > 45 && orientation < 135) {
         orientation = 90;
       } else if (orientation > 225 && orientation < 315) {
