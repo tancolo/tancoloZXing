@@ -16,6 +16,7 @@
 
 package com.google.zxing.tancolo.android;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -80,26 +81,18 @@ import java.util.Map;
 public final class CaptureActivity extends Activity implements SurfaceHolder.Callback {
 
   private static final String TAG = CaptureActivity.class.getSimpleName();
+  private static final String TAG_AAA = "aaa";
 
   private static final long DEFAULT_INTENT_RESULT_DURATION_MS = 1500L;
   private static final long BULK_MODE_SCAN_DELAY_MS = 1000L;
 
   private static final String[] ZXING_URLS = { "http://zxing.appspot.com/scan", "zxing://scan/" };
 
-  private static final int HISTORY_REQUEST_CODE = 0x0000bacc;
-
-  private static final Collection<ResultMetadataType> DISPLAYABLE_METADATA_TYPES =
-      EnumSet.of(ResultMetadataType.ISSUE_NUMBER,
-                 ResultMetadataType.SUGGESTED_PRICE,
-                 ResultMetadataType.ERROR_CORRECTION_LEVEL,
-                 ResultMetadataType.POSSIBLE_COUNTRY);
-
   private CameraManager cameraManager;
   private CaptureActivityHandler handler;
   private Result savedResultToShow;
   private ViewfinderView viewfinderView;
   private TextView statusView;
-  private View resultView;
   private Result lastResult;
   private boolean hasSurface;
   private IntentSource source;
@@ -136,6 +129,10 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.capture);
 
+    //隐藏ActionBar
+    ActionBar actionBar = getActionBar();
+    actionBar.hide();
+
     hasSurface = false;
     inactivityTimer = new InactivityTimer(this);
     beepManager = new BeepManager(this);
@@ -157,13 +154,11 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     // want to open the camera driver and measure the screen size if we're going to show the help on
     // first launch. That led to bugs where the scanning rectangle was the wrong size and partially
     // off screen.
-      Log.e(TAG, "TANHQ===> init cameraManager");
+    Log.e(TAG, "TANHQ===> init cameraManager");
     cameraManager = new CameraManager(getApplication());
 
     viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
     viewfinderView.setCameraManager(cameraManager);
-
-    resultView = findViewById(R.id.result_view);
     statusView = (TextView) findViewById(R.id.status_view);
 
     handler = null;
@@ -557,6 +552,7 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
   private void handleDecodeInternally(Result rawResult, ResultHandler resultHandler, Bitmap barcode) {
 
     CharSequence displayContents = resultHandler.getDisplayContents();
+      Log.d(TAG_AAA, "\n\n displayContents = " + displayContents);
 
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -567,76 +563,75 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
 
     statusView.setVisibility(View.GONE);
     viewfinderView.setVisibility(View.GONE);
-    resultView.setVisibility(View.VISIBLE);
 
-    ImageView barcodeImageView = (ImageView) findViewById(R.id.barcode_image_view);
-    if (barcode == null) {
-      barcodeImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(),
-          R.drawable.launcher_icon));
-    } else {
-      barcodeImageView.setImageBitmap(barcode);
-    }
+    //ImageView barcodeImageView = (ImageView) findViewById(R.id.barcode_image_view);
+//    if (barcode == null) {
+//      barcodeImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(),
+//          R.drawable.launcher_icon));
+//    } else {
+//      barcodeImageView.setImageBitmap(barcode);
+//    }
 
-    TextView formatTextView = (TextView) findViewById(R.id.format_text_view);
-    formatTextView.setText(rawResult.getBarcodeFormat().toString());
+    //TextView formatTextView = (TextView) findViewById(R.id.format_text_view);
+    //formatTextView.setText(rawResult.getBarcodeFormat().toString());
 
-    TextView typeTextView = (TextView) findViewById(R.id.type_text_view);
-    typeTextView.setText(resultHandler.getType().toString());
+    //TextView typeTextView = (TextView) findViewById(R.id.type_text_view);
+    //typeTextView.setText(resultHandler.getType().toString());
 
-    DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-    TextView timeTextView = (TextView) findViewById(R.id.time_text_view);
-    timeTextView.setText(formatter.format(new Date(rawResult.getTimestamp())));
+    //DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+    //TextView timeTextView = (TextView) findViewById(R.id.time_text_view);
+    //timeTextView.setText(formatter.format(new Date(rawResult.getTimestamp())));
 
 
-    TextView metaTextView = (TextView) findViewById(R.id.meta_text_view);
-    View metaTextViewLabel = findViewById(R.id.meta_text_view_label);
-    metaTextView.setVisibility(View.GONE);
-    metaTextViewLabel.setVisibility(View.GONE);
-    Map<ResultMetadataType,Object> metadata = rawResult.getResultMetadata();
-    if (metadata != null) {
-      StringBuilder metadataText = new StringBuilder(20);
-      for (Map.Entry<ResultMetadataType,Object> entry : metadata.entrySet()) {
-        if (DISPLAYABLE_METADATA_TYPES.contains(entry.getKey())) {
-          metadataText.append(entry.getValue()).append('\n');
-        }
-      }
-      if (metadataText.length() > 0) {
-        metadataText.setLength(metadataText.length() - 1);
-        metaTextView.setText(metadataText);
-        metaTextView.setVisibility(View.VISIBLE);
-        metaTextViewLabel.setVisibility(View.VISIBLE);
-      }
-    }
+    //TextView metaTextView = (TextView) findViewById(R.id.meta_text_view);
+    //View metaTextViewLabel = findViewById(R.id.meta_text_view_label);
+    //metaTextView.setVisibility(View.GONE);
+    //metaTextViewLabel.setVisibility(View.GONE);
+//    Map<ResultMetadataType,Object> metadata = rawResult.getResultMetadata();
+//    if (metadata != null) {
+//      StringBuilder metadataText = new StringBuilder(20);
+//      for (Map.Entry<ResultMetadataType,Object> entry : metadata.entrySet()) {
+//        if (DISPLAYABLE_METADATA_TYPES.contains(entry.getKey())) {
+//          metadataText.append(entry.getValue()).append('\n');
+//        }
+//      }
+//      if (metadataText.length() > 0) {
+//        metadataText.setLength(metadataText.length() - 1);
+//        metaTextView.setText(metadataText);
+//        metaTextView.setVisibility(View.VISIBLE);
+//        metaTextViewLabel.setVisibility(View.VISIBLE);
+//      }
+//    }
 
-    TextView contentsTextView = (TextView) findViewById(R.id.contents_text_view);
-    contentsTextView.setText(displayContents);
-    int scaledSize = Math.max(22, 32 - displayContents.length() / 4);
-    contentsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, scaledSize);
+//    TextView contentsTextView = (TextView) findViewById(R.id.contents_text_view);
+//    contentsTextView.setText(displayContents);
+//    int scaledSize = Math.max(22, 32 - displayContents.length() / 4);
+//    contentsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, scaledSize);
 
-    TextView supplementTextView = (TextView) findViewById(R.id.contents_supplement_text_view);
-    supplementTextView.setText("");
-    supplementTextView.setOnClickListener(null);
-    if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-        PreferencesActivity.KEY_SUPPLEMENTAL, true)) {
-//      SupplementalInfoRetriever.maybeInvokeRetrieval(supplementTextView,
-//                                                     resultHandler.getResult(),
-//                                                     historyManager,
-//                                                     this);
-    }
+//    TextView supplementTextView = (TextView) findViewById(R.id.contents_supplement_text_view);
+//    supplementTextView.setText("");
+//    supplementTextView.setOnClickListener(null);
+//    if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+//        PreferencesActivity.KEY_SUPPLEMENTAL, true)) {
+////      SupplementalInfoRetriever.maybeInvokeRetrieval(supplementTextView,
+////                                                     resultHandler.getResult(),
+////                                                     historyManager,
+////                                                     this);
+//    }
 
-    int buttonCount = resultHandler.getButtonCount();
-    ViewGroup buttonView = (ViewGroup) findViewById(R.id.result_button_view);
-    buttonView.requestFocus();
-    for (int x = 0; x < ResultHandler.MAX_BUTTON_COUNT; x++) {
-      TextView button = (TextView) buttonView.getChildAt(x);
-      if (x < buttonCount) {
-        button.setVisibility(View.VISIBLE);
-        button.setText(resultHandler.getButtonText(x));
-        button.setOnClickListener(new ResultButtonListener(resultHandler, x));
-      } else {
-        button.setVisibility(View.GONE);
-      }
-    }
+//    int buttonCount = resultHandler.getButtonCount();
+//    ViewGroup buttonView = (ViewGroup) findViewById(R.id.result_button_view);
+//    buttonView.requestFocus();
+//    for (int x = 0; x < ResultHandler.MAX_BUTTON_COUNT; x++) {
+//      TextView button = (TextView) buttonView.getChildAt(x);
+//      if (x < buttonCount) {
+//        button.setVisibility(View.VISIBLE);
+//        button.setText(resultHandler.getButtonText(x));
+//        button.setOnClickListener(new ResultButtonListener(resultHandler, x));
+//      } else {
+//        button.setVisibility(View.GONE);
+//      }
+//    }
   }
 
   // Briefly show the contents of the barcode, then handle the result outside Barcode Scanner.
@@ -776,7 +771,6 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
   }
 
   private void resetStatusView() {
-    resultView.setVisibility(View.GONE);
     statusView.setText(R.string.msg_default_status);
     statusView.setVisibility(View.VISIBLE);
     viewfinderView.setVisibility(View.VISIBLE);
