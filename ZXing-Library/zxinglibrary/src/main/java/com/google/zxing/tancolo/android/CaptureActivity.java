@@ -189,7 +189,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     decodeFormats = null;
     characterSet = null;
 
-      Log.e(TAG, "TANHQ===> intent = " + intent);
+    Log.e(TAG, "TANHQ===> intent = " + intent);
     if (intent != null) {
 
       String action = intent.getAction();
@@ -335,6 +335,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     switch (keyCode) {
       case KeyEvent.KEYCODE_BACK:
+          Log.e(TAG_AAA, "\n\n ===> source: " + source + ", lastResult: " + lastResult);
         if (source == IntentSource.NATIVE_APP_INTENT) {
           setResult(RESULT_CANCELED);
           finish();
@@ -469,7 +470,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     inactivityTimer.onActivity();
     lastResult = rawResult;
     ResultHandler resultHandler = ResultHandlerFactory.makeResultHandler(this, rawResult);
-Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
+    //Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
 
     boolean fromLiveScan = barcode != null;
     if (fromLiveScan) {
@@ -477,6 +478,7 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
       beepManager.playBeepSoundAndVibrate();
       drawResultPoints(barcode, scaleFactor, rawResult);
     }
+    Log.d(TAG_AAA, "source: " + source);
 
     switch (source) {
       case NATIVE_APP_INTENT:
@@ -552,7 +554,8 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
   private void handleDecodeInternally(Result rawResult, ResultHandler resultHandler, Bitmap barcode) {
 
     CharSequence displayContents = resultHandler.getDisplayContents();
-      Log.d(TAG_AAA, "\n\n displayContents = " + displayContents);
+      Log.d(TAG_AAA, "\n\n displayContents = " + displayContents
+      + "\n " + Log.getStackTraceString(new Throwable()));
 
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -636,6 +639,8 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
 
   // Briefly show the contents of the barcode, then handle the result outside Barcode Scanner.
   private void handleDecodeExternally(Result rawResult, ResultHandler resultHandler, Bitmap barcode) {
+    Log.d(TAG_AAA, "rawResult: " + rawResult);
+    Log.d(TAG_AAA, Log.getStackTraceString(new Throwable()));
 
     if (barcode != null) {
       viewfinderView.drawResultBitmap(barcode);

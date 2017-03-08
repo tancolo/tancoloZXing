@@ -56,24 +56,21 @@ final class DecodeHandler extends Handler {
       return;
     }
 
-    if(R.id.decode == message.what) {
+//    if(R.id.decode == message.what) {
+//      decode((byte[]) message.obj, message.arg1, message.arg2);
+//    }else if(R.id.quit == message.what) {
+//      running = false;
+//      Looper.myLooper().quit();
+//    }else {
+//
+//    }
+
+    if (message.what == R.id.decode) {
       decode((byte[]) message.obj, message.arg1, message.arg2);
-    }else if(R.id.quit == message.what) {
+    } else if (message.what == R.id.quit) {
       running = false;
       Looper.myLooper().quit();
-    }else {
-
     }
-
-//    switch (message.what) {
-//      case R.id.decode:
-//        decode((byte[]) message.obj, message.arg1, message.arg2);
-//        break;
-//      case R.id.quit:
-//        running = false;
-//        Looper.myLooper().quit();
-//        break;
-//    }
   }
 
   /**
@@ -117,7 +114,7 @@ final class DecodeHandler extends Handler {
       // Don't log the barcode contents for security.
       long end = System.currentTimeMillis();
       Log.d(TAG, "Found barcode in " + (end - start) + " ms");
-      Log.d(TAG, Log.getStackTraceString(new Throwable()));
+      //Log.d(TAG, Log.getStackTraceString(new Throwable()));
 
       if (handler != null) {
         Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);

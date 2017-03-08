@@ -275,7 +275,8 @@ public final class ViewfinderView extends View {
   }
 
   public void drawViewfinder() {
-    Log.d(TAG, Log.getStackTraceString(new Throwable()));
+    Log.d(TAG, "drawViewfinder");
+    //Log.d(TAG, Log.getStackTraceString(new Throwable()));
 
     Bitmap resultBitmap = this.resultBitmap;
     this.resultBitmap = null;

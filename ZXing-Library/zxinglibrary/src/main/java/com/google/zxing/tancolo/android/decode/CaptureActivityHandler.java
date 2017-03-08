@@ -158,7 +158,8 @@ Log.d(TAG, "CaptureActivityHandler");
 
   private void restartPreviewAndDecode() {
     Log.d(TAG, "TANHQ===> restartPreviewAndDecode, state = " + state + "\n"
-    + Log.getStackTraceString(new Throwable()));
+    + Log.getStackTraceString(new Throwable())
+ );
 
     if (state == State.SUCCESS) {
       state = State.PREVIEW;
