@@ -23,7 +23,8 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.zxing.client.android.PreferencesActivity;
+
+import com.google.zxing.tancolo.android.PreferencesActivity;
 
 import java.util.ArrayList;
 import java.util.Collection;

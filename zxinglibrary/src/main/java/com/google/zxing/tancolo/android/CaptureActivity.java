@@ -14,23 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.zxing.client.android;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.Result;
-import com.google.zxing.ResultMetadataType;
-import com.google.zxing.ResultPoint;
-import com.google.zxing.client.android.camera.CameraManager;
-import com.google.zxing.client.android.clipboard.ClipboardInterface;
-import com.google.zxing.client.android.history.HistoryActivity;
-import com.google.zxing.client.android.history.HistoryItem;
-import com.google.zxing.client.android.history.HistoryManager;
-import com.google.zxing.client.android.result.ResultButtonListener;
-import com.google.zxing.client.android.result.ResultHandler;
-import com.google.zxing.client.android.result.ResultHandlerFactory;
-import com.google.zxing.client.android.result.supplement.SupplementalInfoRetriever;
-import com.google.zxing.client.android.share.ShareActivity;
+package com.google.zxing.tancolo.android;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -49,7 +33,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -67,12 +50,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.DecodeHintType;
+import com.google.zxing.Result;
+import com.google.zxing.ResultMetadataType;
+import com.google.zxing.ResultPoint;
+import com.google.zxing.tancolo.android.camera.CameraManager;
+import com.google.zxing.tancolo.android.decode.CaptureActivityHandler;
+import com.google.zxing.tancolo.android.result.ResultButtonListener;
+import com.google.zxing.tancolo.android.result.ResultHandler;
+import com.google.zxing.tancolo.android.result.ResultHandlerFactory;
+import com.google.zxing.tancolo.android.view.ViewfinderView;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Map;
+import com.google.zxing.tancolo.android.R;
 
 /**
  * This activity opens the camera and does the actual scanning on a background thread. It draws a
@@ -107,14 +103,12 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   private View resultView;
   private Result lastResult;
   private boolean hasSurface;
-  private boolean copyToClipboard;
   private IntentSource source;
   private String sourceUrl;
   private ScanFromWebPageManager scanFromWebPageManager;
   private Collection<BarcodeFormat> decodeFormats;
   private Map<DecodeHintType,?> decodeHints;
   private String characterSet;
-  private HistoryManager historyManager;
   private InactivityTimer inactivityTimer;
   private BeepManager beepManager;
   private AmbientLightManager ambientLightManager;
@@ -123,7 +117,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   MyOrientationDetector myOrientationDetector;
   //end add
 
-  ViewfinderView getViewfinderView() {
+  public ViewfinderView getViewfinderView() {
     return viewfinderView;
   }
 
@@ -131,7 +125,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     return handler;
   }
 
-  CameraManager getCameraManager() {
+  public CameraManager getCameraManager() {
     return cameraManager;
   }
 
@@ -159,10 +153,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   @Override
   protected void onResume() {
     super.onResume();
-    
-    // historyManager must be initialized here to update the history preference
-    historyManager = new HistoryManager(this);
-    historyManager.trimHistory();
 
     // CameraManager must be initialized here, not in onCreate(). This is necessary because we don't
     // want to open the camera driver and measure the screen size if we're going to show the help on
@@ -171,7 +161,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
       Log.e(TAG, "TANHQ===> init cameraManager");
     cameraManager = new CameraManager(getApplication());
 
-    viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
+    viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view_tancolo);
     viewfinderView.setCameraManager(cameraManager);
 
     resultView = findViewById(R.id.result_view);
@@ -198,9 +188,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     inactivityTimer.onResume();
 
     Intent intent = getIntent();
-
-    copyToClipboard = prefs.getBoolean(PreferencesActivity.KEY_COPY_TO_CLIPBOARD, true)
-        && (intent == null || intent.getBooleanExtra(Intents.Scan.SAVE_HISTORY, true));
 
     source = IntentSource.NONE;
     sourceUrl = null;
@@ -390,26 +377,40 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   public boolean onOptionsItemSelected(MenuItem item) {
     Intent intent = new Intent(Intent.ACTION_VIEW);
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-    switch (item.getItemId()) {
-      case R.id.menu_share:
-        intent.setClassName(this, ShareActivity.class.getName());
-        startActivity(intent);
-        break;
-      case R.id.menu_history:
-        intent.setClassName(this, HistoryActivity.class.getName());
-        startActivityForResult(intent, HISTORY_REQUEST_CODE);
-        break;
-      case R.id.menu_settings:
-        intent.setClassName(this, PreferencesActivity.class.getName());
-        startActivity(intent);
-        break;
-      case R.id.menu_help:
-        intent.setClassName(this, HelpActivity.class.getName());
-        startActivity(intent);
-        break;
-      default:
-        return super.onOptionsItemSelected(item);
+    int itemId = item.getItemId();
+
+    if(itemId == R.id.menu_share) {
+
+    }else if(itemId == R.id.menu_history) {
+
+    }else if(itemId == R.id.menu_settings) {
+
+    }else if(itemId == R.id.menu_help) {
+
+    }else {
+      return super.onOptionsItemSelected(item);
     }
+
+//    switch (item.getItemId()) {
+//      case R.id.menu_share:
+//        //intent.setClassName(this, ShareActivity.class.getName());
+//        //startActivity(intent);
+//        break;
+//      case R.id.menu_history:
+//        //intent.setClassName(this, HistoryActivity.class.getName());
+//        //startActivityForResult(intent, HISTORY_REQUEST_CODE);
+//        break;
+//      case R.id.menu_settings:
+//        //intent.setClassName(this, PreferencesActivity.class.getName());
+//        //startActivity(intent);
+//        break;
+//      case R.id.menu_help:
+//        //intent.setClassName(this, HelpActivity.class.getName());
+//        //startActivity(intent);
+//        break;
+//      default:
+//        return super.onOptionsItemSelected(item);
+//    }
     return true;
   }
 
@@ -417,13 +418,13 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
   public void onActivityResult(int requestCode, int resultCode, Intent intent) {
       Log.d(TAG, "onActivityResult \n" + Log.getStackTraceString(new Throwable()));
 
-    if (resultCode == RESULT_OK && requestCode == HISTORY_REQUEST_CODE && historyManager != null) {
-      int itemNumber = intent.getIntExtra(Intents.History.ITEM_NUMBER, -1);
-      if (itemNumber >= 0) {
-        HistoryItem historyItem = historyManager.buildHistoryItem(itemNumber);
-        decodeOrStoreSavedBitmap(null, historyItem.getResult());
-      }
-    }
+//    if (resultCode == RESULT_OK && requestCode == HISTORY_REQUEST_CODE && historyManager != null) {
+//      int itemNumber = intent.getIntExtra(Intents.History.ITEM_NUMBER, -1);
+//      if (itemNumber >= 0) {
+//        HistoryItem historyItem = historyManager.buildHistoryItem(itemNumber);
+//        decodeOrStoreSavedBitmap(null, historyItem.getResult());
+//      }
+//    }
   }
 
   private void decodeOrStoreSavedBitmap(Bitmap bitmap, Result result) {
@@ -478,7 +479,6 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
 
     boolean fromLiveScan = barcode != null;
     if (fromLiveScan) {
-      historyManager.addHistoryItem(rawResult, resultHandler);
       // Then not from history, so beep/vibrate and we have an image to draw on
       beepManager.playBeepSoundAndVibrate();
       drawResultPoints(barcode, scaleFactor, rawResult);
@@ -559,10 +559,6 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
 
     CharSequence displayContents = resultHandler.getDisplayContents();
 
-    if (copyToClipboard && !resultHandler.areContentsSecure()) {
-      ClipboardInterface.setText(displayContents, this);
-    }
-
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
     if (resultHandler.getDefaultButtonID() != null && prefs.getBoolean(PreferencesActivity.KEY_AUTO_OPEN_WEB, false)) {
@@ -623,10 +619,10 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
     supplementTextView.setOnClickListener(null);
     if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
         PreferencesActivity.KEY_SUPPLEMENTAL, true)) {
-      SupplementalInfoRetriever.maybeInvokeRetrieval(supplementTextView,
-                                                     resultHandler.getResult(),
-                                                     historyManager,
-                                                     this);
+//      SupplementalInfoRetriever.maybeInvokeRetrieval(supplementTextView,
+//                                                     resultHandler.getResult(),
+//                                                     historyManager,
+//                                                     this);
     }
 
     int buttonCount = resultHandler.getButtonCount();
@@ -642,7 +638,6 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
         button.setVisibility(View.GONE);
       }
     }
-
   }
 
   // Briefly show the contents of the barcode, then handle the result outside Barcode Scanner.
@@ -666,11 +661,6 @@ Log.d(TAG, "handleDecode \n" + Log.getStackTraceString(new Throwable()) );
         rawResultString = rawResultString.substring(0, 32) + " ...";
       }
       statusView.setText(getString(resultHandler.getDisplayTitle()) + " : " + rawResultString);
-    }
-
-    if (copyToClipboard && !resultHandler.areContentsSecure()) {
-      CharSequence text = resultHandler.getDisplayContents();
-      ClipboardInterface.setText(text, this);
     }
 
     if (source == IntentSource.NATIVE_APP_INTENT) {

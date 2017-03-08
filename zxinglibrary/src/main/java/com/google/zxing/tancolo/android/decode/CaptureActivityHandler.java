@@ -33,7 +33,9 @@ import android.util.Log;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.Result;
-import com.google.zxing.client.android.camera.CameraManager;
+import com.google.zxing.tancolo.android.CaptureActivity;
+import com.google.zxing.tancolo.android.R;
+import com.google.zxing.tancolo.android.camera.CameraManager;
 
 import java.util.Collection;
 import java.util.Map;
@@ -58,11 +60,11 @@ public final class CaptureActivityHandler extends Handler {
     DONE
   }
 
-  CaptureActivityHandler(CaptureActivity activity,
-                         Collection<BarcodeFormat> decodeFormats,
-                         Map<DecodeHintType,?> baseHints,
-                         String characterSet,
-                         CameraManager cameraManager) {
+  public CaptureActivityHandler(CaptureActivity activity,
+                                Collection<BarcodeFormat> decodeFormats,
+                                Map<DecodeHintType, ?> baseHints,
+                                String characterSet,
+                                CameraManager cameraManager) {
       Log.d(TAG, "CaptureActivityHandler, new DecodeThread");
 
     this.activity = activity;
@@ -79,63 +81,61 @@ Log.d(TAG, "CaptureActivityHandler");
 
   @Override
   public void handleMessage(Message message) {
-    switch (message.what) {
-      case R.id.restart_preview:
-        restartPreviewAndDecode();
-        break;
-      case R.id.decode_succeeded:
-        state = State.SUCCESS;
-        Bundle bundle = message.getData();
-        Bitmap barcode = null;
-        float scaleFactor = 1.0f;
-        if (bundle != null) {
-          byte[] compressedBitmap = bundle.getByteArray(DecodeThread.BARCODE_BITMAP);
-          if (compressedBitmap != null) {
-            barcode = BitmapFactory.decodeByteArray(compressedBitmap, 0, compressedBitmap.length, null);
-            // Mutable copy:
-            barcode = barcode.copy(Bitmap.Config.ARGB_8888, true);
-          }
-          scaleFactor = bundle.getFloat(DecodeThread.BARCODE_SCALED_FACTOR);          
-        }
-        activity.handleDecode((Result) message.obj, barcode, scaleFactor);
-        break;
-      case R.id.decode_failed:
-        // We're decoding as fast as possible, so when one decode fails, start another.
-        state = State.PREVIEW;
-        cameraManager.requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
-        break;
-      case R.id.return_scan_result:
-        activity.setResult(Activity.RESULT_OK, (Intent) message.obj);
-        activity.finish();
-        break;
-      case R.id.launch_product_query:
-        String url = (String) message.obj;
+    if (message.what == R.id.restart_preview) {
+      restartPreviewAndDecode();
 
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        intent.setData(Uri.parse(url));
-
-        ResolveInfo resolveInfo =
-            activity.getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        String browserPackageName = null;
-        if (resolveInfo != null && resolveInfo.activityInfo != null) {
-          browserPackageName = resolveInfo.activityInfo.packageName;
-          Log.d(TAG, "Using browser in package " + browserPackageName);
+    } else if (message.what == R.id.decode_succeeded) {
+      state = State.SUCCESS;
+      Bundle bundle = message.getData();
+      Bitmap barcode = null;
+      float scaleFactor = 1.0f;
+      if (bundle != null) {
+        byte[] compressedBitmap = bundle.getByteArray(DecodeThread.BARCODE_BITMAP);
+        if (compressedBitmap != null) {
+          barcode = BitmapFactory.decodeByteArray(compressedBitmap, 0, compressedBitmap.length, null);
+          // Mutable copy:
+          barcode = barcode.copy(Bitmap.Config.ARGB_8888, true);
         }
+        scaleFactor = bundle.getFloat(DecodeThread.BARCODE_SCALED_FACTOR);
+      }
+      activity.handleDecode((Result) message.obj, barcode, scaleFactor);
 
-        // Needed for default Android browser / Chrome only apparently
-        if ("com.android.browser".equals(browserPackageName) || "com.android.chrome".equals(browserPackageName)) {
-          intent.setPackage(browserPackageName);
-          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-          intent.putExtra(Browser.EXTRA_APPLICATION_ID, browserPackageName);
-        }
+    } else if (message.what == R.id.decode_failed) {// We're decoding as fast as possible, so when one decode fails, start another.
+      state = State.PREVIEW;
+      cameraManager.requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
 
-        try {
-          activity.startActivity(intent);
-        } catch (ActivityNotFoundException ignored) {
-          Log.w(TAG, "Can't find anything to handle VIEW of URI " + url);
-        }
-        break;
+    } else if (message.what == R.id.return_scan_result) {
+      activity.setResult(Activity.RESULT_OK, (Intent) message.obj);
+      activity.finish();
+
+    } else if (message.what == R.id.launch_product_query) {
+      String url = (String) message.obj;
+
+      Intent intent = new Intent(Intent.ACTION_VIEW);
+      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+      intent.setData(Uri.parse(url));
+
+      ResolveInfo resolveInfo =
+              activity.getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+      String browserPackageName = null;
+      if (resolveInfo != null && resolveInfo.activityInfo != null) {
+        browserPackageName = resolveInfo.activityInfo.packageName;
+        Log.d(TAG, "Using browser in package " + browserPackageName);
+      }
+
+      // Needed for default Android browser / Chrome only apparently
+      if ("com.android.browser".equals(browserPackageName) || "com.android.chrome".equals(browserPackageName)) {
+        intent.setPackage(browserPackageName);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Browser.EXTRA_APPLICATION_ID, browserPackageName);
+      }
+
+      try {
+        activity.startActivity(intent);
+      } catch (ActivityNotFoundException ignored) {
+        Log.w(TAG, "Can't find anything to handle VIEW of URI " + url);
+      }
+
     }
   }
 

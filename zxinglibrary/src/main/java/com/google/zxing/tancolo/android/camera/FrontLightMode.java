@@ -18,7 +18,7 @@ package com.google.zxing.tancolo.android.camera;
 
 import android.content.SharedPreferences;
 
-import com.google.zxing.client.android.PreferencesActivity;
+import com.google.zxing.tancolo.android.PreferencesActivity;
 
 /**
  * Enumerates settings of the preference controlling the front light.

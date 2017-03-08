@@ -30,6 +30,8 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.tancolo.android.CaptureActivity;
+import com.google.zxing.tancolo.android.R;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
@@ -53,15 +55,25 @@ final class DecodeHandler extends Handler {
     if (!running) {
       return;
     }
-    switch (message.what) {
-      case R.id.decode:
-        decode((byte[]) message.obj, message.arg1, message.arg2);
-        break;
-      case R.id.quit:
-        running = false;
-        Looper.myLooper().quit();
-        break;
+
+    if(R.id.decode == message.what) {
+      decode((byte[]) message.obj, message.arg1, message.arg2);
+    }else if(R.id.quit == message.what) {
+      running = false;
+      Looper.myLooper().quit();
+    }else {
+
     }
+
+//    switch (message.what) {
+//      case R.id.decode:
+//        decode((byte[]) message.obj, message.arg1, message.arg2);
+//        break;
+//      case R.id.quit:
+//        running = false;
+//        Looper.myLooper().quit();
+//        break;
+//    }
   }
 
   /**

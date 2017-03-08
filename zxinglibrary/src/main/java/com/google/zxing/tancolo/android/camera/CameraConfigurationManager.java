@@ -26,9 +26,10 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import com.google.zxing.client.android.PreferencesActivity;
-import com.google.zxing.client.android.camera.open.CameraFacing;
-import com.google.zxing.client.android.camera.open.OpenCamera;
+import com.google.zxing.tancolo.android.PreferencesActivity;
+import com.google.zxing.tancolo.android.camera.open.CameraFacing;
+import com.google.zxing.tancolo.android.camera.open.OpenCamera;
+
 
 /**
  * A class which deals with reading, parsing, and setting the camera parameters which are used to
