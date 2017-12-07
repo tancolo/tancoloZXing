@@ -4,3 +4,4 @@ build
 .gradle
 app/build
 *.log
+local.properties
