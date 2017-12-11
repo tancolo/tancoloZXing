@@ -1,1 +1,1 @@
-include ':app', ':colozxing'
+include ':app', ':colozxing', ':zxingtest'
