@@ -3,6 +3,8 @@ package com.engine.www.coloZXing.utils;
 import android.content.pm.ActivityInfo;
 import android.support.annotation.IntDef;
 
+import com.engine.www.coloZXing.activity.CaptureActivity;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -15,7 +17,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 /**
  * Created on 2017/12/11.
  * Author: tanhaiqin
- * Description: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, PORTRAIT, and so on!
+ * Description: An annotation for {@link CaptureActivity#getCurrentOrientation()}
  */
 
 @IntDef({ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,

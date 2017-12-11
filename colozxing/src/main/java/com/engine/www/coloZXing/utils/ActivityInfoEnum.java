@@ -8,6 +8,9 @@ import android.content.pm.ActivityInfo;
  * Description: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, PORTRAIT, and so on!
  */
 
+/**
+ * Not Used
+ */
 public enum ActivityInfoEnum {
     SCREEN_ORIENTATION_LANDSCAPE(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE), //0
     SCREEN_ORIENTATION_PORTRAIT(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT), //1
