@@ -28,7 +28,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -53,14 +52,13 @@ import android.widget.Toast;
 import com.engine.www.coloZXing.R;
 import com.engine.www.coloZXing.camera.CameraManager;
 import com.engine.www.coloZXing.decoding.CaptureActivityHandler;
-import com.engine.www.coloZXing.decoding.DecodeFormatManager;
-import com.engine.www.coloZXing.decoding.DecodeHintManager;
 import com.engine.www.coloZXing.decoding.FinishListener;
 import com.engine.www.coloZXing.decoding.InactivityTimer;
 import com.engine.www.coloZXing.decoding.IntentSource;
 import com.engine.www.coloZXing.decoding.Intents;
 import com.engine.www.coloZXing.result.ResultHandler;
 import com.engine.www.coloZXing.result.ResultHandlerFactory;
+import com.engine.www.coloZXing.utils.ActivityInfoAnnotation;
 import com.engine.www.coloZXing.utils.AmbientLightManager;
 import com.engine.www.coloZXing.utils.BeepManager;
 import com.engine.www.coloZXing.utils.LogUtil;
@@ -258,28 +256,40 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         initViewAndCamera();
     }
 
+    /**
+     * @return int. @ActivityInfoAnnotation ensure the value is right.
+     */
+    @ActivityInfoAnnotation
     private int getCurrentOrientation() {
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
-        LogUtil.d(TAG, "getCurrentOrientation: rotation = " + rotation);
+        int screenOrientation;
+
+        LogUtil.d("TANHQ===> getCurrentOrientation: rotation = " + rotation);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            LogUtil.d(TAG, "getCurrentOrientation: ORIENTATION_LANDSCAPE");
+            LogUtil.d("TANHQ==> getCurrentOrientation: ORIENTATION_LANDSCAPE");
             switch (rotation) {
                 case Surface.ROTATION_0:
                 case Surface.ROTATION_90:
-                    return ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    break;
                 default:
-                    return ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                    screenOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                    break;
             }
         } else {
-            LogUtil.d(TAG, "getCurrentOrientation: !!! NOT ORIENTATION_LANDSCAPE");
+            LogUtil.d("TANHQ===> getCurrentOrientation: !!! NOT ORIENTATION_LANDSCAPE");
             switch (rotation) {
                 case Surface.ROTATION_0:
                 case Surface.ROTATION_270:
-                    return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                    screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                    break;
                 default:
-                    return ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                    screenOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                    break;
             }
         }
+
+        return screenOrientation;
     }
 
     @Override

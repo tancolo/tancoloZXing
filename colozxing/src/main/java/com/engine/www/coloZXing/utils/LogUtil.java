@@ -5,7 +5,7 @@ import android.util.Log;
 import java.util.Locale;
 
 /**
- *  A class for debugging
+ * A class for debugging
  */
 public class LogUtil {
 
