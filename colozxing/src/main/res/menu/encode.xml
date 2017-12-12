@@ -20,12 +20,12 @@
         android:icon="@android:drawable/ic_menu_share"
         android:orderInCategory="1"
         android:title="@string/menu_share"
-        app:showAsAction="withText|ifRoom" />
+        android:showAsAction="withText|ifRoom" />
 
     <item
         android:id="@+id/menu_encode"
         android:icon="@android:drawable/ic_menu_sort_alphabetically"
         android:orderInCategory="2"
         android:title="@string/menu_encode_vcard"
-        app:showAsAction="withText|ifRoom" />
+        android:showAsAction="withText|ifRoom" />
 </menu>

@@ -33,8 +33,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -350,42 +348,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        //MenuInflater menuInflater = getMenuInflater();
-        //menuInflater.inflate(R.menu.capture, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-
-        if (item.getItemId() == R.id.menu_settings) {
-//            intent.setClassName(this, PreferencesActivity.class.getName());
-//            startActivity(intent);
-
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-
-        return true;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        LogUtil.d("TANHQ===> onActivityResult " + new Throwable());
-
-//    if (resultCode == RESULT_OK && requestCode == HISTORY_REQUEST_CODE && historyManager != null) {
-//      int itemNumber = intent.getIntExtra(Intents.History.ITEM_NUMBER, -1);
-//      if (itemNumber >= 0) {
-//        HistoryItem historyItem = historyManager.buildHistoryItem(itemNumber);
-//        decodeOrStoreSavedBitmap(null, historyItem.getResult());
-//      }
-//    }
-    }
-
     private void decodeOrStoreSavedBitmap(Bitmap bitmap, Result result) {
         // Bitmap isn't used yet -- will be used soon
         if (handler == null) {
@@ -437,7 +399,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         inactivityTimer.onActivity();
         lastResult = rawResult;
         ResultHandler resultHandler = ResultHandlerFactory.makeResultHandler(this, rawResult);
-        LogUtil.d("TANHQ===> handleDecode" + new Throwable());
+        LogUtil.d("TANHQ===> handleDecode rawResult = " + rawResult + ", barcode = " + barcode);
 
         boolean fromLiveScan = barcode != null;
         if (fromLiveScan) {
@@ -446,6 +408,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
             beepManager.playBeepSoundAndVibrate();
             drawResultPoints(barcode, scaleFactor, rawResult);
         }
+
+        LogUtil.e("TANHQ===> source = " + source);
 
         switch (source) {
             case NATIVE_APP_INTENT:
@@ -718,6 +682,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         } catch (IOException ioe) {
             LogUtil.w(TAG, ioe.toString());
             displayFrameworkBugMessageAndExit();
+
         } catch (RuntimeException e) {
             // Barcode Scanner has seen crashes in the wild of this variety:
             // java.?lang.?RuntimeException: Fail to connect to camera service
