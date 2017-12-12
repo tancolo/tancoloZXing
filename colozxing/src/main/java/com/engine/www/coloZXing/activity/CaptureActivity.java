@@ -25,7 +25,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -45,7 +43,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +76,7 @@ import java.util.EnumSet;
 import java.util.Map;
 
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.CompositeDisposable;
 
 /**
  * This activity opens the camera and does the actual scanning on a background thread. It draws a
@@ -94,9 +92,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
     private static final long DEFAULT_INTENT_RESULT_DURATION_MS = 1500L;
     private static final long BULK_MODE_SCAN_DELAY_MS = 1000L;
-
-    private static final String[] ZXING_URLS = {"http://zxing.appspot.com/scan", "zxing://scan/"};
-
     private static final Collection<ResultMetadataType> DISPLAYABLE_METADATA_TYPES =
             EnumSet.of(ResultMetadataType.ISSUE_NUMBER,
                     ResultMetadataType.SUGGESTED_PRICE,
@@ -122,6 +117,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     private AmbientLightManager ambientLightManager;
 
     private boolean isRxPermissionGranted = false;
+    private CompositeDisposable compositeDisposable;
 
     //add by tan
     MyOrientationDetector myOrientationDetector;
@@ -146,13 +142,12 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.capture);
+        compositeDisposable = new CompositeDisposable();
 
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);
         beepManager = new BeepManager(this);
         ambientLightManager = new AmbientLightManager(this);
-
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         myOrientationDetector = new MyOrientationDetector(this);
         myOrientationDetector.setLastOrientation(getWindowManager().getDefaultDisplay().getRotation());
@@ -168,7 +163,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
      */
     private void initRxPermission() {
         RxPermissions rxPermissions = new RxPermissions(this);
-        rxPermissions.request(Manifest.permission.CAMERA,
+        compositeDisposable.add(rxPermissions.request(Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .subscribe(new io.reactivex.functions.Consumer<Boolean>() {
                     @Override
@@ -184,7 +179,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
                             ToastUtil.showToast("需要相关权限!");
                         }
                     }
-                });
+                }));
     }
 
     /**
@@ -320,6 +315,9 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     @Override
     protected void onDestroy() {
         inactivityTimer.shutdown();
+        if (compositeDisposable != null) {
+            compositeDisposable.dispose();
+        }
         super.onDestroy();
     }
 
@@ -354,8 +352,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.capture, menu);
+        //MenuInflater menuInflater = getMenuInflater();
+        //menuInflater.inflate(R.menu.capture, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -365,8 +363,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 
         if (item.getItemId() == R.id.menu_settings) {
-            intent.setClassName(this, PreferencesActivity.class.getName());
-            startActivity(intent);
+//            intent.setClassName(this, PreferencesActivity.class.getName());
+//            startActivity(intent);
 
         } else {
             return super.onOptionsItemSelected(item);
@@ -539,13 +537,13 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         viewfinderView.setVisibility(View.GONE);
         resultView.setVisibility(View.VISIBLE);
 
-        ImageView barcodeImageView = (ImageView) findViewById(R.id.barcode_image_view);
-        if (barcode == null) {
-            barcodeImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(),
-                    R.drawable.launcher_icon));
-        } else {
-            barcodeImageView.setImageBitmap(barcode);
-        }
+//        ImageView barcodeImageView = (ImageView) findViewById(R.id.barcode_image_view);
+//        if (barcode == null) {
+//            barcodeImageView.setImageBitmap(BitmapFactory.decodeResource(getResources(),
+//                    R.drawable.launcher_icon));
+//        } else {
+//            barcodeImageView.setImageBitmap(barcode);
+//        }
 
         TextView formatTextView = (TextView) findViewById(R.id.format_text_view);
         formatTextView.setText(rawResult.getBarcodeFormat().toString());
@@ -685,13 +683,6 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
             sendReplyMessage(R.id.launch_product_query, replyURL, resultDurationMS);
 
         } else if (source == IntentSource.ZXING_LINK) {
-
-//      if (scanFromWebPageManager != null && scanFromWebPageManager.isScanFromWebPage()) {
-//        String replyURL = scanFromWebPageManager.buildReplyURL(rawResult, resultHandler);
-//        scanFromWebPageManager = null;
-//        sendReplyMessage(R.id.launch_product_query, replyURL, resultDurationMS);
-//      }
-
         }
     }
 
