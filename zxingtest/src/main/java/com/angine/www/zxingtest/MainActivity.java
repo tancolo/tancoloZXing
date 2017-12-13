@@ -7,7 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.engine.www.coloZXing.activity.CaptureActivity;
+import com.engine.www.coloZXing.utils.Constant;
 import com.engine.www.coloZXing.utils.LogUtil;
+import com.engine.www.coloZXing.utils.ToastUtil;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import io.reactivex.annotations.NonNull;
@@ -48,6 +50,38 @@ public class MainActivity extends AppCompatActivity {
         LogUtil.i("TANHQ===> onClick");
 
         Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, Constant.REQUEST_CODE_SCAN);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //super.onActivityResult(requestCode, resultCode, data);
+        LogUtil.d("TANHQ===> onActivityResult: requestCode = " + requestCode + ", resultCode = " + resultCode);
+        LogUtil.d("TANHQ===> onActivityResult: data = " + data);
+
+        switch (requestCode) {
+            case Constant.REQUEST_CODE_SCAN:
+                handleRequestCodeScanEvent(resultCode, data);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    /**
+     * handle the scanning event
+     * @param resultCode
+     * @param data
+     *
+     */
+    private void handleRequestCodeScanEvent(int resultCode, Intent data) {
+        LogUtil.d("TANHQ===> handleEvent: resultCode = " + resultCode + ", data = " + data);
+
+        if (resultCode == RESULT_OK && data != null) {
+            String result = data.getStringExtra(Constant.REQUEST_CODE_SCAN_RESULT);
+            ToastUtil.showToast(result);
+        }
+    }
+
 }

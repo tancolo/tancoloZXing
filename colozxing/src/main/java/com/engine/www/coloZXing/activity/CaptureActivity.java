@@ -42,7 +42,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.engine.www.coloZXing.R;
 import com.engine.www.coloZXing.camera.CameraManager;
@@ -56,6 +55,7 @@ import com.engine.www.coloZXing.result.ResultHandlerFactory;
 import com.engine.www.coloZXing.utils.ActivityInfoAnnotation;
 import com.engine.www.coloZXing.utils.AmbientLightManager;
 import com.engine.www.coloZXing.utils.BeepManager;
+import com.engine.www.coloZXing.utils.Constant;
 import com.engine.www.coloZXing.utils.LogUtil;
 import com.engine.www.coloZXing.utils.ToastUtil;
 import com.engine.www.coloZXing.view.ViewfinderView;
@@ -312,6 +312,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 
     @Override
     protected void onDestroy() {
+        LogUtil.d("TANHQ===> onDestroy!");
+
         inactivityTimer.shutdown();
         if (compositeDisposable != null) {
             compositeDisposable.dispose();
@@ -399,42 +401,29 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
         inactivityTimer.onActivity();
         lastResult = rawResult;
         ResultHandler resultHandler = ResultHandlerFactory.makeResultHandler(this, rawResult);
-        LogUtil.d("TANHQ===> handleDecode rawResult = " + rawResult + ", barcode = " + barcode);
+        LogUtil.d("TANHQ===> handleDecode rawResult = " + rawResult
+                + ", barcode = " + barcode
+                + ", scaleFactor = " + scaleFactor);
+
+        if (barcode != null) {
+            LogUtil.d("TANHQ===> bitmap W x H : " + barcode.getWidth() + " x " + barcode.getHeight());
+        }
 
         boolean fromLiveScan = barcode != null;
         if (fromLiveScan) {
             //historyManager.addHistoryItem(rawResult, resultHandler);
             // Then not from history, so beep/vibrate and we have an image to draw on
-            beepManager.playBeepSoundAndVibrate();
-            drawResultPoints(barcode, scaleFactor, rawResult);
-        }
 
-        LogUtil.e("TANHQ===> source = " + source);
+            //beepManager.playBeepSoundAndVibrate();
+            //drawResultPoints(barcode, scaleFactor, rawResult);
+            //handleDecodeInternally(rawResult, resultHandler, barcode);
 
-        switch (source) {
-            case NATIVE_APP_INTENT:
-            case PRODUCT_SEARCH_LINK:
-                handleDecodeExternally(rawResult, resultHandler, barcode);
-                break;
-//      case ZXING_LINK:
-//        if (scanFromWebPageManager == null || !scanFromWebPageManager.isScanFromWebPage()) {
-//          handleDecodeInternally(rawResult, resultHandler, barcode);
-//        } else {
-//          handleDecodeExternally(rawResult, resultHandler, barcode);
-//        }
-//        break;
-            case NONE:
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-                if (fromLiveScan && prefs.getBoolean(PreferencesActivity.KEY_BULK_MODE, false)) {
-                    Toast.makeText(getApplicationContext(),
-                            getResources().getString(R.string.msg_bulk_mode_scanned) + " (" + rawResult.getText() + ')',
-                            Toast.LENGTH_SHORT).show();
-                    // Wait a moment or else it will scan the same barcode continuously about 3 times
-                    restartPreviewAfterDelay(BULK_MODE_SCAN_DELAY_MS);
-                } else {
-                    handleDecodeInternally(rawResult, resultHandler, barcode);
-                }
-                break;
+            //return to waking Activity.
+            LogUtil.d("TANHQ===> setResult...");
+            Intent intent = new Intent();
+            intent.putExtra(Constant.REQUEST_CODE_SCAN_RESULT, (rawResult != null) ? rawResult.getText() : "");
+            setResult(RESULT_OK, intent);
+            finish();
         }
     }
 
