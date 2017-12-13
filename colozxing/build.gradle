@@ -33,4 +33,7 @@ dependencies {
     compile 'com.google.zxing:android-core:3.3.0';
     compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar';
     compile 'io.reactivex.rxjava2:rxjava:2.1.1';
+
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 }
