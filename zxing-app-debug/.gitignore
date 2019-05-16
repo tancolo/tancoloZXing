@@ -1,0 +1,11 @@
+.idea
+*.iml
+build
+.gradle
+app/build
+*.log
+local.properties
+captures/
+*.index
+*.zip
+*.hprof

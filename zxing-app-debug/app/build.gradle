@@ -1,0 +1,25 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 25
+    buildToolsVersion '25.0.3'
+
+    defaultConfig {
+        applicationId "com.google.zxing.client.android"
+        minSdkVersion 15
+        targetSdkVersion 25
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.google.zxing:core:3.3.1';
+    compile 'com.google.zxing:android-core:3.3.0';
+    compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar';
+    compile 'io.reactivex.rxjava2:rxjava:2.1.1';
+}
