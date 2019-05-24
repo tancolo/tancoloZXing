@@ -4,8 +4,10 @@
 
 # 用途
 基于Google ZXing官方发布的zxing-3.3.3（当前最新）为基础。[Google ZXing](https://github.com/zxing/zxing/releases/tag/zxing-3.3.3)
-用于同步更新官方ZXing库中android目录，编译出可用的APK。
-希望对ZXing源码感兴趣的开发者有帮助， 顺手Star.
+
+用于同步更新官方ZXing库中android目录，编译出可用的[APK](https://github.com/tancolo/tancoloZXing/blob/master/zxing-original-app/build-apk/app-debug.apk?raw=true)
+
+**如果有帮到你， 顺手Star是对我最大的鼓励, 感谢**
 
 # 分析文章
 ## CSDN专栏
