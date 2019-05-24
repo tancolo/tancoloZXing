@@ -146,6 +146,26 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
     ambientLightManager = new AmbientLightManager(this);
 
     PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+    //add by tancolo, request the permission CAMERA
+    RxPermissions rxPermissions = new RxPermissions(this);
+    rxPermissions
+            .request(Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            .subscribe(new Consumer<Boolean>() {
+              @Override
+              public void accept(@NonNull Boolean granted) throws Exception {
+                if (granted) { // Always true pre-M
+                  // I can control the camera now
+                  Log.d(TAG, "TANHQ===> camera permission ok!");
+
+                } else {
+                  // Oups permission denied
+                  Log.d(TAG, "TANHQ===> camera permission error！");
+                }
+              }
+            });
+    //end
   }
 
   @Override
