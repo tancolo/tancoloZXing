@@ -16,6 +16,7 @@
 
 package com.google.zxing.client.android.result;
 
+import android.telephony.PhoneNumberUtils;
 import com.google.zxing.Result;
 import com.google.zxing.client.android.Contents;
 import com.google.zxing.client.android.Intents;
@@ -200,28 +201,32 @@ public abstract class ResultHandler {
     // Only use the first name in the array, if present.
     Intent intent = new Intent(Intent.ACTION_INSERT_OR_EDIT, ContactsContract.Contacts.CONTENT_URI);
     intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-    putExtra(intent, ContactsContract.Intents.Insert.NAME, names != null ? names[0] : null);
+    putExtra(intent, ContactsContract.Intents.Insert.NAME, names != null && names.length > 0 ? names[0] : null);
 
     putExtra(intent, ContactsContract.Intents.Insert.PHONETIC_NAME, pronunciation);
 
-    int phoneCount = Math.min(phoneNumbers != null ? phoneNumbers.length : 0, Contents.PHONE_KEYS.length);
-    for (int x = 0; x < phoneCount; x++) {
-      putExtra(intent, Contents.PHONE_KEYS[x], phoneNumbers[x]);
-      if (phoneTypes != null && x < phoneTypes.length) {
-        int type = toPhoneContractType(phoneTypes[x]);
-        if (type >= 0) {
-          intent.putExtra(Contents.PHONE_TYPE_KEYS[x], type);
+    if (phoneNumbers != null) {
+      int phoneCount = Math.min(phoneNumbers.length, Contents.PHONE_KEYS.length);
+      for (int x = 0; x < phoneCount; x++) {
+        putExtra(intent, Contents.PHONE_KEYS[x], phoneNumbers[x]);
+        if (phoneTypes != null && x < phoneTypes.length) {
+          int type = toPhoneContractType(phoneTypes[x]);
+          if (type >= 0) {
+            intent.putExtra(Contents.PHONE_TYPE_KEYS[x], type);
+          }
         }
       }
     }
 
-    int emailCount = Math.min(emails != null ? emails.length : 0, Contents.EMAIL_KEYS.length);
-    for (int x = 0; x < emailCount; x++) {
-      putExtra(intent, Contents.EMAIL_KEYS[x], emails[x]);
-      if (emailTypes != null && x < emailTypes.length) {
-        int type = toEmailContractType(emailTypes[x]);
-        if (type >= 0) {
-          intent.putExtra(Contents.EMAIL_TYPE_KEYS[x], type);
+    if (emails != null) {
+      int emailCount = Math.min(emails.length, Contents.EMAIL_KEYS.length);
+      for (int x = 0; x < emailCount; x++) {
+        putExtra(intent, Contents.EMAIL_KEYS[x], emails[x]);
+        if (emailTypes != null && x < emailTypes.length) {
+          int type = toEmailContractType(emailTypes[x]);
+          if (type >= 0) {
+            intent.putExtra(Contents.EMAIL_TYPE_KEYS[x], type);
+          }
         }
       }
     }
@@ -269,7 +274,7 @@ public abstract class ResultHandler {
     if (note != null) {
       aggregatedNotes.append('\n').append(note);
     }
-    if (geo != null) {
+    if (geo != null && geo.length >= 2) {
       aggregatedNotes.append('\n').append(geo[0]).append(',').append(geo[1]);
     }
 
@@ -277,8 +282,14 @@ public abstract class ResultHandler {
       // Remove extra leading '\n'
       putExtra(intent, ContactsContract.Intents.Insert.NOTES, aggregatedNotes.substring(1));
     }
-    
-    putExtra(intent, ContactsContract.Intents.Insert.IM_HANDLE, instantMessenger);
+
+    if (instantMessenger != null && instantMessenger.startsWith("xmpp:")) {
+      intent.putExtra(ContactsContract.Intents.Insert.IM_PROTOCOL, ContactsContract.CommonDataKinds.Im.PROTOCOL_JABBER);
+      intent.putExtra(ContactsContract.Intents.Insert.IM_HANDLE, instantMessenger.substring(5));
+    } else {
+      putExtra(intent, ContactsContract.Intents.Insert.IM_HANDLE, instantMessenger);
+    }
+
     putExtra(intent, ContactsContract.Intents.Insert.POSTAL, address);
     if (addressType != null) {
       int type = toAddressContractType(addressType);
@@ -450,7 +461,7 @@ public abstract class ResultHandler {
    */
   final void rawLaunchIntent(Intent intent) {
     if (intent != null) {
-      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+      intent.addFlags(Intents.FLAG_NEW_DOC);
       Log.d(TAG, "Launching intent: " + intent + " with extras: " + intent.getExtras());
       activity.startActivity(intent);
     }
@@ -508,6 +519,11 @@ public abstract class ResultHandler {
     }
     // Replace %s last as it might contain itself %f or %t
     return url.replace("%s", text);
+  }
+
+  static String formatPhone(String phoneData) {
+    // Just collect the call to a deprecated method in one place
+    return PhoneNumberUtils.formatNumber(phoneData);
   }
 
 }
