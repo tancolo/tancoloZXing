@@ -1,3 +1,5 @@
+# [English Readme](https://github.com/tancolo/tancoloZXing/blob/master/Readme-english.md)
+
 # tancoloZXing
 基于ZXing3.3.3 (zxing-core 3.3.3, zxing-android3.3.0)开源项目分析
 
